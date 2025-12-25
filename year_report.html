@@ -1,0 +1,489 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2025 年度聊天报告</title>
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+    
+    <style>
+        /* Start Screen Button in Slide */
+        .start-btn {
+            padding: 15px 50px;
+            font-size: 1.5em;
+            background: #ff9a9e;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4);
+            animation: pulse 2s infinite;
+            font-family: 'Microsoft YaHei', sans-serif;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .start-btn:hover {
+            transform: scale(1.1);
+            background: #ff7e83;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255, 154, 158, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4); }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fdf5e6;
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden; /* Prevent native scroll */
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('Nikki.jpg') no-repeat center center;
+            background-size: cover;
+            opacity: 0.7;
+            z-index: -1;
+        }
+        .swiper {
+            width: 100vw;
+            height: 100vh;
+        }
+        .swiper-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Custom Slide Styles */
+        .slide-cover {
+            background: linear-gradient(135deg, rgba(255, 154, 158, 0.9) 0%, rgba(254, 207, 239, 0.9) 100%);
+            color: white;
+            text-align: center;
+        }
+        .slide-cover h1 { font-size: 2.2em; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .slide-cover p { font-size: 1.1em; opacity: 0.9; }
+        
+        .slide-title {
+            font-size: 1.4em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            z-index: 10;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 45vh;
+            min-height: 250px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            background: #fff0f5;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stat-val { font-size: 1.5em; color: #d63384; font-weight: bold; }
+        .stat-lbl { color: #666; font-size: 0.8em; }
+        
+        .memory-box {
+            width: 100%;
+            background: #fff0f5;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ffdeeb;
+            font-size: 0.9em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .memory-time { color: #d63384; font-weight: bold; font-size: 0.8em; margin-bottom: 5px;}
+        .memory-content { 
+            background: white; 
+            padding: 8px; 
+            border-radius: 5px; 
+            border-left: 3px solid #d63384; 
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        /* Animation hint */
+        .swipe-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            animation: bounce 2s infinite;
+            font-size: 0.9em;
+            opacity: 0.8;
+            z-index: 100;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+            40% {transform: translateX(-50%) translateY(-10px);}
+            60% {transform: translateX(-50%) translateY(-5px);}
+        }
+        
+        /* Swiper Pagination Customization */
+        .swiper-pagination-bullet-active {
+            background: #764ba2 !important;
+        }
+        /* Music Control Button */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 20px;
+            animation: rotate 3s linear infinite;
+            animation-play-state: paused;
+        }
+        #music-control.playing {
+            animation-play-state: running;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- Background Music -->
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <div id="music-control" onclick="toggleMusic()">🎵</div>
+
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+            <!-- Slide 0: Start Screen -->
+            <div class="swiper-slide" id="start-slide">
+                <h1 style="color: #764ba2; font-size: 2.5em; margin-bottom: 30px; text-shadow: 0 2px 5px rgba(0,0,0,0.1);">2025 年度回忆</h1>
+                <button class="start-btn" onclick="startJourney()">开启回忆</button>
+            </div>
+
+            <!-- Slide 1: Cover -->
+            <div class="swiper-slide slide-cover">
+                <div class="animate__animated animate__fadeInDown">
+                    <h1>📅 2025<br>年度聊天报告</h1>
+                    <p>2025-01-01 ~ 2025-12-25</p>
+                    <div style="margin-top: 40px; font-size: 3em;">🎁</div>
+                </div>
+                <div class="swipe-hint">☝️ 上滑开启回忆</div>
+            </div>
+            
+            <!-- Slide 2: Overview & Memory -->
+            <div class="swiper-slide">
+                <div class="slide-title animate__animated animate__fadeInLeft">🌟 我们的回忆</div>
+                
+                <div class="stats-grid animate__animated animate__zoomIn">
+                    <div class="stat-item">
+                        <div class="stat-val">44269</div>
+                        <div class="stat-lbl">总消息数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val">359</div>
+                        <div class="stat-lbl">聊天天数</div>
+                    </div>
+                </div>
+                
+                <div class="memory-box animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                    <div>🚀 <strong>2025 第一声问候</strong></div>
+                    <div class="memory-time">2025-01-01 00:39:09</div>
+                    <div class="memory-content">
+                        <strong>邪恶小烩面😈:</strong>
+                        晚归扣学分
+                    </div>
+                </div>
+                
+                 <div class="memory-box animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                    <div>�️ <strong>最初的相遇</strong></div>
+                    <div class="memory-time">2024-09-25 17:59:09</div>
+                    <div class="memory-content">
+                         <strong>Дерево:</strong>
+                         哈喽哈喽！
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3: Sender & Type -->
+            <div class="swiper-slide">
+                <div class="slide-title">👥 谁更爱说话？</div>
+                <div id="senderChart" class="chart-container" style="height: 30vh;"></div>
+                <div class="slide-title" style="margin-top: 15px; font-size: 1.2em;">📨 消息类型</div>
+                <div id="typeChart" class="chart-container" style="height: 30vh;"></div>
+            </div>
+            
+            <!-- Slide 4: Daily Trend -->
+            <div class="swiper-slide">
+                <div class="slide-title">📈 这一年的起伏</div>
+                <div id="dailyChart" class="chart-container" style="height: 60vh;"></div>
+            </div>
+            
+            <!-- Slide 5: Hourly Activity -->
+            <div class="swiper-slide">
+                <div class="slide-title">⏰ 我们什么时候最活跃？</div>
+                <div id="hourlyChart" class="chart-container" style="height: 60vh;"></div>
+            </div>
+            
+            <!-- Slide 6: Topics -->
+            <div class="swiper-slide">
+                <div class="slide-title">🗣 我们最爱聊...</div>
+                <div id="topicChart" class="chart-container" style="height: 65vh;"></div>
+            </div>
+            
+            <!-- Slide 7: WordCloud -->
+            <div class="swiper-slide">
+                <div class="slide-title">🌈 年度关键词</div>
+                <div id="wordCloudChart" class="chart-container" style="height: 60vh;"></div>
+            </div>
+            
+            <!-- Slide 8: End -->
+            <div class="swiper-slide slide-cover" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                <div class="animate__animated animate__zoomIn">
+                    <h1 style="font-size: 4em;">❤️</h1>
+                    <h2>感谢有你</h2>
+                    <p style="margin-top: 20px;">2026，未完待续...</p>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination -->
+        <div class="swiper-pagination"></div>
+    </div>
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <script>
+        // Start Screen Logic
+        function startJourney() {
+            const bgm = document.getElementById('bgm');
+            const musicBtn = document.getElementById('music-control');
+            
+            // Play music
+            bgm.play().then(() => {
+                musicBtn.classList.add('playing');
+            }).catch(e => console.log('Playback failed:', e));
+
+            // Enable swiping and go to next slide
+            if (swiper) {
+                swiper.allowTouchMove = true;
+                if (swiper.mousewheel) swiper.mousewheel.enable();
+                swiper.slideNext();
+            }
+        }
+
+        // Music Control
+        const bgm = document.getElementById('bgm');
+        const musicBtn = document.getElementById('music-control');
+        
+        function toggleMusic() {
+            if (bgm.paused) {
+                bgm.play();
+                musicBtn.classList.add('playing');
+            } else {
+                bgm.pause();
+                musicBtn.classList.remove('playing');
+            }
+        }
+
+        // Auto play hint interaction
+        // Attempt autoplay on load (still keep this for browsers that might allow it)
+        window.addEventListener('load', function() {
+            bgm.play().then(() => {
+                musicBtn.classList.add('playing');
+                // If autoplay works, we can hide the start screen automatically or keep it?
+                // Let's keep the start screen for consistent experience, or hide it if music plays?
+                // Actually, let's keep the start screen as the main entry point to ensure interaction.
+            }).catch(e => {
+                console.log('Autoplay prevented by browser, waiting for interaction');
+            });
+        });
+
+        // Data Injection
+        const dailyData = [['2025-01-01', 73], ['2025-01-02', 60], ['2025-01-03', 19], ['2025-01-04', 40], ['2025-01-05', 66], ['2025-01-06', 54], ['2025-01-07', 106], ['2025-01-08', 30], ['2025-01-09', 72], ['2025-01-10', 46], ['2025-01-11', 7], ['2025-01-12', 111], ['2025-01-13', 5], ['2025-01-14', 55], ['2025-01-15', 33], ['2025-01-16', 3], ['2025-01-17', 86], ['2025-01-18', 3], ['2025-01-19', 11], ['2025-01-20', 69], ['2025-01-21', 252], ['2025-01-22', 14], ['2025-01-23', 14], ['2025-01-24', 15], ['2025-01-25', 22], ['2025-01-26', 39], ['2025-01-27', 79], ['2025-01-28', 6], ['2025-01-29', 18], ['2025-01-30', 49], ['2025-01-31', 5], ['2025-02-01', 8], ['2025-02-02', 193], ['2025-02-03', 21], ['2025-02-04', 138], ['2025-02-05', 268], ['2025-02-06', 147], ['2025-02-07', 265], ['2025-02-08', 28], ['2025-02-09', 23], ['2025-02-10', 40], ['2025-02-11', 0], ['2025-02-12', 40], ['2025-02-13', 34], ['2025-02-14', 36], ['2025-02-15', 101], ['2025-02-16', 43], ['2025-02-17', 0], ['2025-02-18', 41], ['2025-02-19', 16], ['2025-02-20', 0], ['2025-02-21', 9], ['2025-02-22', 27], ['2025-02-23', 70], ['2025-02-24', 98], ['2025-02-25', 51], ['2025-02-26', 90], ['2025-02-27', 35], ['2025-02-28', 4], ['2025-03-01', 30], ['2025-03-02', 214], ['2025-03-03', 1018], ['2025-03-04', 157], ['2025-03-05', 628], ['2025-03-06', 141], ['2025-03-07', 73], ['2025-03-08', 39], ['2025-03-09', 189], ['2025-03-10', 404], ['2025-03-11', 336], ['2025-03-12', 450], ['2025-03-13', 154], ['2025-03-14', 258], ['2025-03-15', 214], ['2025-03-16', 146], ['2025-03-17', 381], ['2025-03-18', 81], ['2025-03-19', 147], ['2025-03-20', 50], ['2025-03-21', 113], ['2025-03-22', 154], ['2025-03-23', 150], ['2025-03-24', 72], ['2025-03-25', 430], ['2025-03-26', 682], ['2025-03-27', 413], ['2025-03-28', 346], ['2025-03-29', 64], ['2025-03-30', 524], ['2025-03-31', 586], ['2025-04-01', 384], ['2025-04-02', 1300], ['2025-04-03', 284], ['2025-04-04', 393], ['2025-04-05', 32], ['2025-04-06', 135], ['2025-04-07', 236], ['2025-04-08', 688], ['2025-04-09', 248], ['2025-04-10', 236], ['2025-04-11', 267], ['2025-04-12', 47], ['2025-04-13', 898], ['2025-04-14', 277], ['2025-04-15', 211], ['2025-04-16', 40], ['2025-04-17', 294], ['2025-04-18', 181], ['2025-04-19', 86], ['2025-04-20', 113], ['2025-04-21', 200], ['2025-04-22', 1052], ['2025-04-23', 1085], ['2025-04-24', 172], ['2025-04-25', 266], ['2025-04-26', 4], ['2025-04-27', 68], ['2025-04-28', 158], ['2025-04-29', 354], ['2025-04-30', 98], ['2025-05-01', 53], ['2025-05-02', 125], ['2025-05-03', 88], ['2025-05-04', 418], ['2025-05-05', 31], ['2025-05-06', 160], ['2025-05-07', 212], ['2025-05-08', 64], ['2025-05-09', 976], ['2025-05-10', 221], ['2025-05-11', 113], ['2025-05-12', 114], ['2025-05-13', 73], ['2025-05-14', 85], ['2025-05-15', 75], ['2025-05-16', 149], ['2025-05-17', 5], ['2025-05-18', 453], ['2025-05-19', 22], ['2025-05-20', 123], ['2025-05-21', 32], ['2025-05-22', 77], ['2025-05-23', 100], ['2025-05-24', 36], ['2025-05-25', 32], ['2025-05-26', 231], ['2025-05-27', 296], ['2025-05-28', 239], ['2025-05-29', 69], ['2025-05-30', 96], ['2025-05-31', 19], ['2025-06-01', 121], ['2025-06-02', 100], ['2025-06-03', 91], ['2025-06-04', 222], ['2025-06-05', 148], ['2025-06-06', 314], ['2025-06-07', 57], ['2025-06-08', 119], ['2025-06-09', 179], ['2025-06-10', 271], ['2025-06-11', 357], ['2025-06-12', 22], ['2025-06-13', 123], ['2025-06-14', 56], ['2025-06-15', 71], ['2025-06-16', 75], ['2025-06-17', 144], ['2025-06-18', 248], ['2025-06-19', 274], ['2025-06-20', 2], ['2025-06-21', 2], ['2025-06-22', 212], ['2025-06-23', 91], ['2025-06-24', 107], ['2025-06-25', 11], ['2025-06-26', 48], ['2025-06-27', 15], ['2025-06-28', 73], ['2025-06-29', 1], ['2025-06-30', 237], ['2025-07-01', 47], ['2025-07-02', 5], ['2025-07-03', 1], ['2025-07-04', 17], ['2025-07-05', 4], ['2025-07-06', 9], ['2025-07-07', 253], ['2025-07-08', 37], ['2025-07-09', 94], ['2025-07-10', 111], ['2025-07-11', 53], ['2025-07-12', 98], ['2025-07-13', 161], ['2025-07-14', 12], ['2025-07-15', 9], ['2025-07-16', 52], ['2025-07-17', 1], ['2025-07-18', 81], ['2025-07-19', 36], ['2025-07-20', 6], ['2025-07-21', 3], ['2025-07-22', 17], ['2025-07-23', 4], ['2025-07-24', 14], ['2025-07-25', 528], ['2025-07-26', 2], ['2025-07-27', 537], ['2025-07-28', 90], ['2025-07-29', 109], ['2025-07-30', 158], ['2025-07-31', 43], ['2025-08-01', 16], ['2025-08-02', 30], ['2025-08-03', 169], ['2025-08-04', 61], ['2025-08-05', 41], ['2025-08-06', 43], ['2025-08-07', 18], ['2025-08-08', 10], ['2025-08-09', 41], ['2025-08-10', 12], ['2025-08-11', 28], ['2025-08-12', 25], ['2025-08-13', 11], ['2025-08-14', 4], ['2025-08-15', 19], ['2025-08-16', 19], ['2025-08-17', 5], ['2025-08-18', 91], ['2025-08-19', 0], ['2025-08-20', 68], ['2025-08-21', 23], ['2025-08-22', 32], ['2025-08-23', 16], ['2025-08-24', 11], ['2025-08-25', 163], ['2025-08-26', 30], ['2025-08-27', 47], ['2025-08-28', 36], ['2025-08-29', 0], ['2025-08-30', 13], ['2025-08-31', 200], ['2025-09-01', 17], ['2025-09-02', 60], ['2025-09-03', 93], ['2025-09-04', 27], ['2025-09-05', 45], ['2025-09-06', 4], ['2025-09-07', 28], ['2025-09-08', 176], ['2025-09-09', 161], ['2025-09-10', 43], ['2025-09-11', 159], ['2025-09-12', 322], ['2025-09-13', 11], ['2025-09-14', 62], ['2025-09-15', 220], ['2025-09-16', 96], ['2025-09-17', 0], ['2025-09-18', 143], ['2025-09-19', 10], ['2025-09-20', 92], ['2025-09-21', 413], ['2025-09-22', 235], ['2025-09-23', 35], ['2025-09-24', 23], ['2025-09-25', 0], ['2025-09-26', 37], ['2025-09-27', 15], ['2025-09-28', 33], ['2025-09-29', 8], ['2025-09-30', 0], ['2025-10-01', 13], ['2025-10-02', 6], ['2025-10-03', 0], ['2025-10-04', 111], ['2025-10-05', 29], ['2025-10-06', 14], ['2025-10-07', 45], ['2025-10-08', 1], ['2025-10-09', 40], ['2025-10-10', 41], ['2025-10-11', 319], ['2025-10-12', 5], ['2025-10-13', 75], ['2025-10-14', 57], ['2025-10-15', 42], ['2025-10-16', 155], ['2025-10-17', 146], ['2025-10-18', 161], ['2025-10-19', 31], ['2025-10-20', 66], ['2025-10-21', 9], ['2025-10-22', 13], ['2025-10-23', 89], ['2025-10-24', 35], ['2025-10-25', 24], ['2025-10-26', 20], ['2025-10-27', 34], ['2025-10-28', 26], ['2025-10-29', 2], ['2025-10-30', 0], ['2025-10-31', 0], ['2025-11-01', 35], ['2025-11-02', 165], ['2025-11-03', 5], ['2025-11-04', 11], ['2025-11-05', 50], ['2025-11-06', 21], ['2025-11-07', 253], ['2025-11-08', 137], ['2025-11-09', 136], ['2025-11-10', 293], ['2025-11-11', 12], ['2025-11-12', 961], ['2025-11-13', 40], ['2025-11-14', 16], ['2025-11-15', 14], ['2025-11-16', 28], ['2025-11-17', 394], ['2025-11-18', 244], ['2025-11-19', 214], ['2025-11-20', 157], ['2025-11-21', 83], ['2025-11-22', 22], ['2025-11-23', 34], ['2025-11-24', 244], ['2025-11-25', 268], ['2025-11-26', 83], ['2025-11-27', 26], ['2025-11-28', 10], ['2025-11-29', 43], ['2025-11-30', 67], ['2025-12-01', 60], ['2025-12-02', 359], ['2025-12-03', 162], ['2025-12-04', 177], ['2025-12-05', 47], ['2025-12-06', 23], ['2025-12-07', 87], ['2025-12-08', 51], ['2025-12-09', 79], ['2025-12-10', 78], ['2025-12-11', 16], ['2025-12-12', 17], ['2025-12-13', 31], ['2025-12-14', 6], ['2025-12-15', 34], ['2025-12-16', 19], ['2025-12-17', 35], ['2025-12-18', 142], ['2025-12-19', 234], ['2025-12-20', 4], ['2025-12-21', 39], ['2025-12-22', 51], ['2025-12-23', 23], ['2025-12-24', 61], ['2025-12-25', 0]];
+        const hourlyData = [321, 57, 3, 13, 12, 0, 10, 448, 1560, 2958, 2398, 2730, 2588, 1537, 1727, 2199, 2744, 2610, 2730, 3654, 3367, 3709, 4778, 2116];
+        const topicData = [{'name': '📚 学习上课', 'value': 774}, {'name': '🐱 罗小黑', 'value': 184}, {'name': '👗 暖暖系列', 'value': 175}, {'name': '💻 项目开发', 'value': 127}, {'name': '🎮 星露谷物语', 'value': 77}];
+        const wordCloudData = [{'name': '喜欢', 'value': 289}, {'name': '阴险', 'value': 266}, {'name': '已经', 'value': 260}, {'name': '东西', 'value': 259}, {'name': '今天', 'value': 252}, {'name': '为什么', 'value': 239}, {'name': '恐惧', 'value': 237}, {'name': '不会', 'value': 236}, {'name': '哈哈哈哈', 'value': 233}, {'name': '发怒', 'value': 221}, {'name': '一直', 'value': 218}, {'name': '刚刚', 'value': 213}, {'name': '老师', 'value': 213}, {'name': '出来', 'value': 199}, {'name': '加油', 'value': 199}, {'name': '不想', 'value': 198}, {'name': '有点', 'value': 195}, {'name': '不要', 'value': 184}, {'name': '开始', 'value': 184}, {'name': '宝宝', 'value': 181}, {'name': '之前', 'value': 179}, {'name': 'hhh', 'value': 178}, {'name': '朋友', 'value': 178}, {'name': '以后', 'value': 177}, {'name': '我要', 'value': 166}, {'name': '不过', 'value': 166}, {'name': '他们', 'value': 164}, {'name': '看看', 'value': 164}, {'name': '好像', 'value': 160}, {'name': '起来', 'value': 159}, {'name': '这种', 'value': 156}, {'name': '不能', 'value': 153}, {'name': '好吃', 'value': 150}, {'name': '一起', 'value': 148}, {'name': '应该', 'value': 145}, {'name': '明天', 'value': 134}, {'name': '问题', 'value': 134}, {'name': '宿舍', 'value': 133}, {'name': '只是', 'value': 132}, {'name': '好好', 'value': 132}, {'name': '要是', 'value': 131}, {'name': '一样', 'value': 129}, {'name': '看见', 'value': 127}, {'name': '看到', 'value': 122}, {'name': '咱们', 'value': 120}, {'name': '睡觉', 'value': 120}, {'name': '上课', 'value': 120}, {'name': '发现', 'value': 120}, {'name': '不行', 'value': 120}, {'name': '小时', 'value': 119}, {'name': '时间', 'value': 116}, {'name': '游戏', 'value': 116}, {'name': '抱拳', 'value': 115}, {'name': '学校', 'value': 115}, {'name': '好多', 'value': 114}, {'name': '下午', 'value': 114}, {'name': '突然', 'value': 114}, {'name': '卧槽', 'value': 113}, {'name': '事情', 'value': 112}, {'name': '讨厌', 'value': 111}, {'name': '当时', 'value': 111}, {'name': '以前', 'value': 110}, {'name': '小孩', 'value': 109}, {'name': '笑脸', 'value': 109}, {'name': '苦涩', 'value': 106}, {'name': 'hhhh', 'value': 105}, {'name': '超级', 'value': 105}, {'name': '里面', 'value': 105}, {'name': '晚上', 'value': 105}, {'name': '完全', 'value': 105}, {'name': '我草', 'value': 104}, {'name': '你们', 'value': 102}, {'name': '可怜', 'value': 101}, {'name': '那种', 'value': 99}, {'name': '那么', 'value': 98}, {'name': '确实', 'value': 97}, {'name': '有人', 'value': 97}, {'name': '我服', 'value': 97}, {'name': '别人', 'value': 97}, {'name': '别的', 'value': 97}, {'name': '休息', 'value': 96}, {'name': '不好', 'value': 95}, {'name': '亲亲', 'value': 95}, {'name': '疑问', 'value': 95}, {'name': '世界', 'value': 93}, {'name': '很多', 'value': 93}, {'name': '孩子', 'value': 93}, {'name': '没事', 'value': 92}, {'name': '结果', 'value': 90}, {'name': '比较', 'value': 89}, {'name': '本来', 'value': 88}, {'name': '最近', 'value': 86}, {'name': '最后', 'value': 85}, {'name': '非常', 'value': 85}, {'name': '直接', 'value': 85}, {'name': '鹿野', 'value': 84}, {'name': '为啥', 'value': 81}, {'name': '的话', 'value': 81}, {'name': '图书馆', 'value': 80}, {'name': '原来', 'value': 79}];
+        const senderData = [{'name': '邪恶小烩面😈', 'value': 25151, 'chars': 239779}, {'name': 'Дерево', 'value': 19118, 'chars': 218911}];
+        const typeData = [{'name': '文本消息', 'value': 29009}, {'name': '动画表情', 'value': 7921}, {'name': '图片消息', 'value': 3286}, {'name': '引用消息', 'value': 3265}, {'name': '图文消息', 'value': 253}, {'name': '视频消息', 'value': 139}, {'name': '卡片式链接', 'value': 122}, {'name': '语音消息', 'value': 99}, {'name': '系统消息', 'value': 75}, {'name': '聊天记录合并转发', 'value': 29}, {'name': '文件消息', 'value': 24}, {'name': '未知类型(219043332145)', 'value': 16}, {'name': '转账卡片', 'value': 13}, {'name': '位置消息', 'value': 5}, {'name': '未知类型(141733920817)', 'value': 4}, {'name': '小程序分享', 'value': 3}, {'name': '未知类型(4294967345)', 'value': 3}, {'name': '名片消息', 'value': 2}, {'name': '未知类型(73014455032)', 'value': 1}];
+
+        // Init Swiper
+        var swiper = new Swiper(".mySwiper", {
+            direction: "vertical",
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            allowTouchMove: false,
+            mousewheel: false,
+            effect: 'slide',
+            on: {
+                slideChangeTransitionEnd: function () {
+                    resizeCharts();
+                }
+            }
+        });
+
+        // Chart Initialization
+        const senderChart = echarts.init(document.getElementById('senderChart'));
+        const typeChart = echarts.init(document.getElementById('typeChart'));
+        const dailyChart = echarts.init(document.getElementById('dailyChart'));
+        const hourlyChart = echarts.init(document.getElementById('hourlyChart'));
+        const topicChart = echarts.init(document.getElementById('topicChart'));
+        const wordCloudChart = echarts.init(document.getElementById('wordCloudChart'));
+        
+        const charts = [senderChart, typeChart, dailyChart, hourlyChart, topicChart, wordCloudChart];
+        
+        function resizeCharts() {
+            charts.forEach(chart => chart.resize());
+        }
+        
+        window.addEventListener('resize', resizeCharts);
+
+        // --- Chart Options ---
+        
+        senderChart.setOption({
+            tooltip: { trigger: 'item' },
+            legend: { bottom: '0%', left: 'center' },
+            series: [{
+                name: '消息数',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                center: ['50%', '45%'],
+                itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+                data: senderData
+            }]
+        });
+        
+        typeChart.setOption({
+            color: ['#ff9a9e', '#fad0c4', '#fbc2eb', '#a18cd1', '#ffecd2', '#ffb3a7', '#ffc3a0', '#d4a5a5', '#e3b4b8', '#f3d1d1'],
+            tooltip: { trigger: 'item' },
+            legend: { bottom: '0%', left: 'center' },
+            series: [{
+                name: '类型',
+                type: 'pie',
+                radius: '60%',
+                center: ['50%', '45%'],
+                data: typeData
+            }]
+        });
+        
+        dailyChart.setOption({
+            grid: { left: '3%', right: '5%', bottom: '10%', top: '10%', containLabel: true },
+            tooltip: { trigger: 'axis' },
+            xAxis: { type: 'category', data: dailyData.map(i=>i[0]) },
+            yAxis: { type: 'value' },
+            series: [{
+                data: dailyData.map(i=>i[1]),
+                type: 'line',
+                smooth: true,
+                areaStyle: { opacity: 0.3 },
+                itemStyle: { color: '#764ba2' }
+            }]
+        });
+        
+        hourlyChart.setOption({
+            grid: { left: '3%', right: '5%', bottom: '10%', top: '10%', containLabel: true },
+            tooltip: { trigger: 'axis' },
+            xAxis: { type: 'category', data: Array.from({length:24},(_,i)=>i+'点') },
+            yAxis: { type: 'value' },
+            series: [{
+                data: hourlyData,
+                type: 'bar',
+                itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#fad0c4'},{offset:1,color:'#ff9a9e'}]) }
+            }]
+        });
+        
+        topicChart.setOption({
+            grid: { left: '3%', right: '8%', bottom: '3%', top: '5%', containLabel: true },
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            xAxis: { type: 'value' },
+            yAxis: { type: 'category', data: topicData.map(i=>i.name).reverse() },
+            series: [{
+                data: topicData.map(i=>i.value).reverse(),
+                type: 'bar',
+                label: { show: true, position: 'right' },
+                itemStyle: { color: '#ff9999' }
+            }]
+        });
+        
+        wordCloudChart.setOption({
+            series: [{
+                type: 'wordCloud',
+                shape: 'circle',
+                left: 'center', top: 'center',
+                width: '100%', height: '100%',
+                right: 0, bottom: 0,
+                sizeRange: [12, 60],
+                rotationRange: [-45, 45],
+                gridSize: 8,
+                drawOutOfBound: false,
+                textStyle: {
+                    fontFamily: 'sans-serif',
+                    fontWeight: 'bold',
+                    color: function () {
+                        // Generate warm/pink/brown colors
+                        return 'rgb(' + [
+                            Math.round(100 + Math.random() * 100),
+                            Math.round(20 + Math.random() * 80),
+                            Math.round(20 + Math.random() * 80)
+                        ].join(',') + ')';
+                    }
+                },
+                emphasis: { focus: 'self', textStyle: { shadowBlur: 10, shadowColor: '#333' } },
+                data: wordCloudData
+            }]
+        });
+        
+        // Initial resize
+        setTimeout(resizeCharts, 500);
+    </script>
+</body>
+</html>
+    
